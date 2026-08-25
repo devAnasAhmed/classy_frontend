@@ -152,7 +152,7 @@ function renderCart() {
     subtotal += total;
     html += `
       <div class="flex items-center gap-4 bg-white p-4 rounded-2xl shadow-sm">
-        <img src="${item.image}" alt="${item.name}" class="w-20 h-20 object-cover rounded-xl" onerror="this.src='https://via.placeholder.com/100'">
+        <img src="${item.image}" alt="${item.name}" class="w-20 h-20 object-cover rounded-xl" onerror="this.src='https://placehold.co/100'">
         <div class="flex-1">
           <h4 class="font-bold">${item.name}</h4>
           <p class="text-primary-dark font-bold">${formatPrice(item.price)}</p>
@@ -201,7 +201,7 @@ function renderCheckoutSummary() {
     html += `
       <div class="flex justify-between items-center py-2 border-b border-gray-100">
         <div class="flex items-center gap-3">
-          <img src="${item.image}" class="w-12 h-12 rounded-lg object-cover" onerror="this.src='https://via.placeholder.com/100'">
+          <img src="${item.image}" class="w-12 h-12 rounded-lg object-cover" onerror="this.src='https://placehold.co/100'">
           <div>
             <div class="font-semibold text-sm">${item.name}</div>
             <div class="text-gray-400 text-xs">x${item.quantity}</div>
@@ -297,7 +297,7 @@ function renderProductCard(product) {
   return `
     <div class="product-card fade-in">
       <div class="relative">
-        <img src="${product.image}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/400'">
+        <img src="${product.image}" alt="${product.name}" onerror="this.src='https://placehold.co/400'">
         ${discount > 0 ? `<span class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">-${discount}%</span>` : ''}
         <button onclick="addToCart('${product._id}')" class="absolute bottom-3 left-3 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center text-primary-dark hover:bg-primary hover:text-white transition-colors">
           <i class="fas fa-plus"></i>
@@ -386,7 +386,7 @@ async function loadProductDetail() {
   container.innerHTML = `
     <div class="grid lg:grid-cols-2 gap-10">
       <div class="bg-white rounded-3xl p-6 shadow-lg">
-        <img src="${product.image}" alt="${product.name}" class="w-full rounded-2xl" onerror="this.src='https://via.placeholder.com/600'">
+        <img src="${product.image}" alt="${product.name}" class="w-full rounded-2xl" onerror="this.src='https://placehold.co/600'">
       </div>
       <div>
         <div class="text-sm text-gray-400 mb-2">${product.category}</div>
@@ -428,7 +428,7 @@ function loadCategories() {
   if (!container) return;
   container.innerHTML = DEMO_CATEGORIES.map(cat => `
     <a href="products.html" class="group relative rounded-3xl overflow-hidden shadow-lg h-64">
-      <img src="${cat.image}" alt="${cat.name}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" onerror="this.src='https://via.placeholder.com/400'">
+      <img src="${cat.image}" alt="${cat.name}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" onerror="this.src='https://placehold.co/400'">
       <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-6">
         <div class="text-3xl mb-2">${cat.icon}</div>
         <h3 class="text-white text-xl font-bold">${cat.name}</h3>
