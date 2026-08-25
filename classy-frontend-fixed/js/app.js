@@ -10,14 +10,7 @@ function getPublicApiUrl() {
 // ===== DEMO DATA (disabled - real products now come from the backend only) =====
 const DEMO_PRODUCTS = [];
 
-const DEMO_CATEGORIES = [
-  { _id: 'c1', name: 'كتب تلوين', icon: '🎨', image: 'https://images.unsplash.com/photo-1513519245088-0e12902e35ca?w=400&h=300&fit=crop', count: 12 },
-  { _id: 'c2', name: 'بوكسات ورد', icon: '🌹', image: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=400&h=300&fit=crop', count: 8 },
-  { _id: 'c3', name: 'نوتات مخصصة', icon: '📓', image: 'https://images.unsplash.com/photo-1544816155-12df9643f363?w=400&h=300&fit=crop', count: 15 },
-  { _id: 'c4', name: 'تغريسات تخرج', icon: '🎓', image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=400&h=300&fit=crop', count: 20 },
-  { _id: 'c5', name: 'براويز مواليد', icon: '👶', image: 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400&h=300&fit=crop', count: 6 },
-  { _id: 'c6', name: 'هدايا مخصصة', icon: '✨', image: 'https://images.unsplash.com/photo-1513519245088-0e12902e35ca?w=400&h=300&fit=crop', count: 10 },
-];
+
 
 // ===== HELPERS =====
 let cachedProducts = null;
