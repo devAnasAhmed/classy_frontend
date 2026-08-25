@@ -5,7 +5,7 @@
 
 // API URL - localhost is never valid for visitors of a deployed Vercel site.
 function getApiUrl() {
- return localStorage.getItem('classy-backend.vercel.app') || 'http://localhost:5000/api';}
+ return localStorage.getItem('classy-backend.vercel.app') ;}
 
 // ===== AUTH =====
 function getToken() { return localStorage.getItem('classy_admin_token'); }
