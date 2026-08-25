@@ -4,7 +4,7 @@
 // ================================
 
 function getPublicApiUrl() {
-  return (classy-backend.vercel.app || '').replace(/\/$/, '');
+   return 'https://classy-backend.vercel.app/api';
 }
 
 // ===== DEMO DATA =====
