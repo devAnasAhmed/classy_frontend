@@ -3,9 +3,11 @@
 // Connected to Backend API
 // ================================
 
-// API URL - localhost is never valid for visitors of a deployed Vercel site.
+// API URL - can be configured via localStorage or defaults to localhost
 function getApiUrl() {
- return localStorage.getItem('classy_api_url') || 'https://classy-backend.vercel.app/api';}
+  return localStorage.getItem('classy_api_url') || 'https://classy-backend.vercel.app/api';
+}
+const API_URL = getApiUrl();
 
 // ===== AUTH =====
 function getToken() { return localStorage.getItem('classy_admin_token'); }
@@ -33,14 +35,12 @@ function logout() {
 
 // ===== API HELPERS =====
 async function apiGet(endpoint) {
-  if (!getApiUrl()) return { success: false, error: 'لم يتم إعداد رابط الـ API' };
   try {
     const res = await fetch(getApiUrl() + endpoint, { headers: getAuthHeaders() });
     return await res.json();
   } catch (e) { return { success: false, error: e.message }; }
 }
 async function apiPostForm(endpoint, formData) {
-  if (!getApiUrl()) return { success: false, error: 'لم يتم إعداد رابط الـ API' };
   try {
     const res = await fetch(getApiUrl() + endpoint, {
       method: 'POST',
@@ -51,7 +51,6 @@ async function apiPostForm(endpoint, formData) {
   } catch (e) { return { success: false, error: e.message }; }
 }
 async function apiPutForm(endpoint, formData) {
-  if (!getApiUrl()) return { success: false, error: 'لم يتم إعداد رابط الـ API' };
   try {
     const res = await fetch(getApiUrl() + endpoint, {
       method: 'PUT',
@@ -62,7 +61,6 @@ async function apiPutForm(endpoint, formData) {
   } catch (e) { return { success: false, error: e.message }; }
 }
 async function apiDelete(endpoint) {
-  if (!getApiUrl()) return { success: false, error: 'لم يتم إعداد رابط الـ API' };
   try {
     const res = await fetch(getApiUrl() + endpoint, { method: 'DELETE', headers: getAuthHeaders() });
     return await res.json();
@@ -759,16 +757,12 @@ async function saveSetting(key, value) {
 
 // ===== API CONFIG =====
 function saveApiUrl() {
-  const input = document.getElementById('apiUrlInput');
-  const url = input.value.trim().replace(/\/$/, '');
-
-  if (!url) {
-    showToast('اكتب رابط السيرفر أولاً', 'error');
-    return;
-  }
-
+  const url = document.getElementById('apiUrlInput')?.value.trim();
+  if (!url) { showToast('يرجى إدخال رابط السيرفر!', 'error'); return; }
   localStorage.setItem('classy_api_url', url);
-  showToast('تم حفظ رابط السيرفر بنجاح', 'success');
+  API_URL = url;
+  showToast('تم حفظ رابط السيرفر! جاري إعادة التحميل...', 'success');
+  setTimeout(() => location.reload(), 1000);
 }
 
 async function testApiConnection() {
