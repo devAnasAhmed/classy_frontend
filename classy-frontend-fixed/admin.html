@@ -14,7 +14,7 @@
   <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
-      <img src="../images/logo.png" alt="CLASSY" class="sidebar-logo">
+      <img src="raq.png" alt="CLASSY" class="sidebar-logo">
       <span class="sidebar-brand">CLASSY Admin</span>
     </div>
     <nav class="sidebar-menu">
@@ -256,7 +256,7 @@
         <div class="card-body">
           <div class="form-group-admin">
             <label class="form-label-admin">رابط API الباك اند</label>
-            <input type="url" class="form-input-admin" id="apiUrlInput" placeholder="https://your-backend.example.com/api">
+            <input type="url" class="form-input-admin" id="apiUrlInput" placeholder="https://your-api.com/api" value="http://localhost:5000/api">
             <p class="text-xs text-gray-400 mt-1">مثال: https://classy-api.onrender.com/api</p>
           </div>
           <button class="btn-primary" onclick="saveApiUrl()"><i class="fas fa-save"></i> حفظ رابط السيرفر</button>
@@ -499,7 +499,6 @@
   <!-- Toast -->
   <div class="toast" id="toast"></div>
 
-  <script src="js/config.js"></script>
   <script src="js/admin.js"></script>
 </body>
 </html>
