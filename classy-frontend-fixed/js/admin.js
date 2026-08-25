@@ -5,8 +5,7 @@
 
 // API URL - localhost is never valid for visitors of a deployed Vercel site.
 function getApiUrl() {
-  return localStorage.getItem('classy_api_url') || window.CLASSY_API_URL || '';
-}
+ return localStorage.getItem('classy_api_url') || 'http://localhost:5000/api';}
 
 // ===== AUTH =====
 function getToken() { return localStorage.getItem('classy_admin_token'); }
@@ -760,11 +759,16 @@ async function saveSetting(key, value) {
 
 // ===== API CONFIG =====
 function saveApiUrl() {
-  const url = document.getElementById('apiUrlInput')?.value.trim();
-  if (!url) { showToast('يرجى إدخال رابط السيرفر!', 'error'); return; }
+  const input = document.getElementById('apiUrlInput');
+  const url = input.value.trim().replace(/\/$/, '');
+
+  if (!url) {
+    showToast('اكتب رابط السيرفر أولاً', 'error');
+    return;
+  }
+
   localStorage.setItem('classy_api_url', url);
-  showToast('تم حفظ رابط السيرفر! جاري إعادة التحميل...', 'success');
-  setTimeout(() => location.reload(), 1000);
+  showToast('تم حفظ رابط السيرفر بنجاح', 'success');
 }
 
 async function testApiConnection() {
