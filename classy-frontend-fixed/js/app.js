@@ -10,7 +10,14 @@ function getPublicApiUrl() {
 // ===== DEMO DATA (disabled - real products now come from the backend only) =====
 const DEMO_PRODUCTS = [];
 
-
+// أيقونة اختيارية لكل تصنيف معروف (شكل بس، مش بيانات وهمية)
+const CATEGORY_ICONS = {
+  'كتب تلوين': '🎨',
+  'بوكسات ورد': '🌹',
+  'نوتات مخصصة': '📓',
+  'تغريسات تخرج': '🎓',
+  'براويز مواليد': '👶',
+};
 
 // ===== HELPERS =====
 let cachedProducts = null;
@@ -408,14 +415,35 @@ async function loadProductDetail() {
 }
 
 // ===== CATEGORIES =====
-function loadCategories() {
+// التصنيفات بتتحسب دلوقتي من المنتجات الحقيقية القادمة من الباك اند - مفيش بيانات وهمية
+async function loadCategories() {
   const container = document.getElementById('categoriesContainer');
   if (!container) return;
-  container.innerHTML = DEMO_CATEGORIES.map(cat => `
+
+  const products = await getProducts();
+
+  if (!products.length) {
+    container.innerHTML = '<p class="text-center text-gray-400 col-span-full py-10">لا توجد تصنيفات متاحة حالياً</p>';
+    return;
+  }
+
+  // تجميع المنتجات حسب التصنيف، مع أخذ عدد المنتجات وصورة حقيقية من أول منتج بكل تصنيف
+  const categoriesMap = {};
+  products.forEach(p => {
+    if (!p.category) return;
+    if (!categoriesMap[p.category]) {
+      categoriesMap[p.category] = { name: p.category, image: p.image, count: 0 };
+    }
+    categoriesMap[p.category].count++;
+  });
+
+  const categories = Object.values(categoriesMap);
+
+  container.innerHTML = categories.map(cat => `
     <a href="products.html" class="group relative rounded-3xl overflow-hidden shadow-lg h-64">
       <img src="${cat.image}" alt="${cat.name}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" onerror="this.src='https://placehold.co/400'">
       <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-6">
-        <div class="text-3xl mb-2">${cat.icon}</div>
+        <div class="text-3xl mb-2">${CATEGORY_ICONS[cat.name] || '🎁'}</div>
         <h3 class="text-white text-xl font-bold">${cat.name}</h3>
         <p class="text-white/70 text-sm">${cat.count} منتج</p>
       </div>
