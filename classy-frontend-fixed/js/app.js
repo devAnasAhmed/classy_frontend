@@ -1,13 +1,13 @@
 // ================================
 // CLASSY - Main App JavaScript
-// Frontend Only (localStorage)
+// Connected to Backend API (with local fallback)
 // ================================
 
 function getPublicApiUrl() {
    return 'https://classy-backend.vercel.app/api';
 }
 
-// ===== DEMO DATA =====
+// ===== DEMO DATA (Fallback only - used if backend is unreachable) =====
 const DEMO_PRODUCTS = [
   { _id: 'p1', name: 'كتاب تلوين Mandala', category: 'كتب تلوين', price: 120, oldPrice: 150, stock: 25, status: 'active', rating: 4.9, reviews: 45, image: 'https://images.unsplash.com/photo-1513519245088-0e12902e35ca?w=400&h=300&fit=crop', description: 'كتاب تلوين فاخر بتصاميم Mandala معقدة ومريحة للأعصاب. 40 صفحة من الإبداع.' },
   { _id: 'p2', name: 'بوكس ورد مجفف', category: 'بوكسات ورد', price: 350, oldPrice: 400, stock: 10, status: 'active', rating: 4.8, reviews: 32, image: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=400&h=300&fit=crop', description: 'بوكس خشبي أنيق مملوء بورد طبيعي مجفف بألوان دافئة. يدوم لسنوات.' },
@@ -29,15 +29,22 @@ const DEMO_CATEGORIES = [
 ];
 
 // ===== HELPERS =====
-function getProducts() {
-  const local = JSON.parse(localStorage.getItem('classy_local_products') || '[]');
-  const all = [...DEMO_PRODUCTS];
-  local.forEach(lp => {
-    const idx = all.findIndex(p => p._id === lp._id);
-    if (idx >= 0) all[idx] = lp;
-    else all.push(lp);
-  });
-  return all;
+let cachedProducts = null;
+
+async function getProducts() {
+  if (cachedProducts) return cachedProducts;
+  try {
+    const res = await fetch(`${getPublicApiUrl()}/products`);
+    const result = await res.json();
+    if (result.success && result.data && result.data.length) {
+      cachedProducts = result.data;
+      return cachedProducts;
+    }
+  } catch (e) {
+    console.warn('تعذر الاتصال بالباك اند، هيتم استخدام بيانات تجريبية', e);
+  }
+  cachedProducts = DEMO_PRODUCTS;
+  return cachedProducts;
 }
 
 function getCart() {
@@ -74,8 +81,8 @@ function updateCartCount() {
   }
 }
 
-function addToCart(productId, qty = 1) {
-  const products = getProducts();
+async function addToCart(productId, qty = 1) {
+  const products = await getProducts();
   const product = products.find(p => p._id === productId);
   if (!product) return;
 
@@ -309,25 +316,25 @@ function renderProductCard(product) {
   `;
 }
 
-function loadFeaturedProducts() {
+async function loadFeaturedProducts() {
   const container = document.getElementById('productsContainer');
   if (!container) return;
-  const products = getProducts().filter(p => p.status === 'active').slice(0, 8);
+  const products = (await getProducts()).filter(p => p.status === 'active').slice(0, 8);
   container.innerHTML = products.map(renderProductCard).join('');
 }
 
-function loadAllProducts() {
+async function loadAllProducts() {
   const container = document.getElementById('productsContainer');
   if (!container) return;
-  const products = getProducts().filter(p => p.status === 'active');
+  const products = (await getProducts()).filter(p => p.status === 'active');
   container.innerHTML = products.map(renderProductCard).join('');
   loadCategoryFilters();
 }
 
-function loadCategoryFilters() {
+async function loadCategoryFilters() {
   const container = document.getElementById('categoryFilters');
   if (!container) return;
-  const products = getProducts();
+  const products = await getProducts();
   const categories = [...new Set(products.map(p => p.category))];
   let html = `<button class="filter-btn active" onclick="filterProducts('all')">الكل</button>`;
   categories.forEach(cat => {
@@ -336,8 +343,8 @@ function loadCategoryFilters() {
   container.innerHTML = html;
 }
 
-function filterProducts(category) {
-  const products = getProducts().filter(p => p.status === 'active');
+async function filterProducts(category) {
+  const products = (await getProducts()).filter(p => p.status === 'active');
   const filtered = category === 'all' ? products : products.filter(p => p.category === category);
   const container = document.getElementById('productsContainer');
   if (container) container.innerHTML = filtered.map(renderProductCard).join('');
@@ -346,9 +353,9 @@ function filterProducts(category) {
   if (event && event.target) event.target.classList.add('active');
 }
 
-function searchProducts() {
+async function searchProducts() {
   const query = document.getElementById('searchInput')?.value.toLowerCase() || '';
-  const products = getProducts().filter(p => p.status === 'active');
+  const products = (await getProducts()).filter(p => p.status === 'active');
   const filtered = products.filter(p => 
     p.name.toLowerCase().includes(query) || 
     p.category.toLowerCase().includes(query) ||
@@ -363,12 +370,13 @@ function searchProducts() {
 }
 
 // ===== PRODUCT DETAIL =====
-function loadProductDetail() {
+async function loadProductDetail() {
   const container = document.getElementById('productDetail');
   if (!container) return;
   const params = new URLSearchParams(window.location.search);
   const id = params.get('id');
-  const product = getProducts().find(p => p._id === id);
+  const products = await getProducts();
+  const product = products.find(p => p._id === id);
   if (!product) {
     container.innerHTML = '<div class="text-center py-20 text-gray-400">المنتج غير موجود</div>';
     return;
@@ -409,7 +417,7 @@ function loadProductDetail() {
   // Load related products
   const relatedContainer = document.getElementById('relatedProducts');
   if (relatedContainer) {
-    const related = getProducts().filter(p => p.category === product.category && p._id !== product._id).slice(0, 4);
+    const related = products.filter(p => p.category === product.category && p._id !== product._id).slice(0, 4);
     relatedContainer.innerHTML = related.map(renderProductCard).join('') || '<div class="col-span-full text-center text-gray-400">لا توجد منتجات مشابهة</div>';
   }
 }
