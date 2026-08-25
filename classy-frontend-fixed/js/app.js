@@ -7,17 +7,8 @@ function getPublicApiUrl() {
    return 'https://classy-backend.vercel.app/api';
 }
 
-// ===== DEMO DATA (Fallback only - used if backend is unreachable) =====
-const DEMO_PRODUCTS = [
-  { _id: 'p1', name: 'كتاب تلوين Mandala', category: 'كتب تلوين', price: 120, oldPrice: 150, stock: 25, status: 'active', rating: 4.9, reviews: 45, image: 'https://images.unsplash.com/photo-1513519245088-0e12902e35ca?w=400&h=300&fit=crop', description: 'كتاب تلوين فاخر بتصاميم Mandala معقدة ومريحة للأعصاب. 40 صفحة من الإبداع.' },
-  { _id: 'p2', name: 'بوكس ورد مجفف', category: 'بوكسات ورد', price: 350, oldPrice: 400, stock: 10, status: 'active', rating: 4.8, reviews: 32, image: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=400&h=300&fit=crop', description: 'بوكس خشبي أنيق مملوء بورد طبيعي مجفف بألوان دافئة. يدوم لسنوات.' },
-  { _id: 'p3', name: 'نوتة Van Gogh', category: 'نوتات مخصصة', price: 85, oldPrice: 100, stock: 30, status: 'active', rating: 4.7, reviews: 28, image: 'https://images.unsplash.com/photo-1544816155-12df9643f363?w=400&h=300&fit=crop', description: 'نوتة A5 بتصميم فني مستوحى من لوحات Van Gogh. ورق عالي الجودة.' },
-  { _id: 'p4', name: 'تغريسة تخرج Senior', category: 'تغريسات تخرج', price: 60, oldPrice: 75, stock: 50, status: 'active', rating: 4.9, reviews: 65, image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=400&h=300&fit=crop', description: 'تغريسة خشبية مخصصة بتصميم Senior 2026. يمكن إضافة اسم وصورة.' },
-  { _id: 'p5', name: 'برواز مولود', category: 'براويز مواليد', price: 200, oldPrice: 250, stock: 15, status: 'active', rating: 5.0, reviews: 40, image: 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400&h=300&fit=crop', description: 'برواز أنيق يحمل تفاصيل ميلاد المولود: الاسم، التاريخ، الوزن، والطول.' },
-  { _id: 'p6', name: 'كتاب تلوين حيوانات', category: 'كتب تلوين', price: 100, oldPrice: 130, stock: 20, status: 'active', rating: 4.6, reviews: 22, image: 'https://images.unsplash.com/photo-1493612276216-ee3925520721?w=400&h=300&fit=crop', description: 'كتاب تلوين كرتوني لطيف للأطفال والكبار. 30 صفحة من المتعة.' },
-  { _id: 'p7', name: 'بوكس ورد طبيعي', category: 'بوكسات ورد', price: 400, oldPrice: 450, stock: 8, status: 'active', rating: 4.9, reviews: 18, image: 'https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=400&h=300&fit=crop', description: 'بوكس ورد طبيعي مجفف بألوان دافئة وتغليف فاخر. هدية مثالية.' },
-  { _id: 'p8', name: 'نوتة اقتباسات عربية', category: 'نوتات مخصصة', price: 75, oldPrice: 90, stock: 35, status: 'active', rating: 4.8, reviews: 30, image: 'https://images.unsplash.com/photo-1531346878377-a5be20888e57?w=400&h=300&fit=crop', description: 'نوتة بتصميم عربي مميز واقتباسات ملهمة. هدية راقية لعشاق الكتابة.' },
-];
+// ===== DEMO DATA (disabled - real products now come from the backend only) =====
+const DEMO_PRODUCTS = [];
 
 const DEMO_CATEGORIES = [
   { _id: 'c1', name: 'كتب تلوين', icon: '🎨', image: 'https://images.unsplash.com/photo-1513519245088-0e12902e35ca?w=400&h=300&fit=crop', count: 12 },
@@ -36,7 +27,8 @@ async function getProducts() {
   try {
     const res = await fetch(`${getPublicApiUrl()}/products`);
     const result = await res.json();
-    if (result.success && result.data && result.data.length) {
+    if (result.success && Array.isArray(result.data)) {
+      // Backend responded successfully - use its data even if empty (no fake demo fallback)
       cachedProducts = result.data;
       return cachedProducts;
     }
