@@ -1,2 +1,2 @@
 // The deployed CLASSY backend, without a trailing slash.
-window.CLASSY_API_URL = 'https://classy-dch29hjr.b4a.run/api';
+window.CLASSY_API_URL = 'https://1-mzo77i5b.b4a.run/api';
