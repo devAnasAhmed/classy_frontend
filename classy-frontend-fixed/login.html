@@ -179,7 +179,7 @@
 </head>
 <body>
   <div class="login-card">
-    <img src="../images/logo.png" alt="CLASSY" class="login-logo">
+    <img src="raq.png" alt="CLASSY" class="login-logo">
     <h1 class="login-title">CLASSY Admin</h1>
     <p class="login-subtitle">لوحة تحكم براند راق — تسجيل الدخول</p>
 
@@ -214,9 +214,8 @@
     </div>
   </div>
 
-  <script src="js/config.js"></script>
   <script>
-    const API_URL = localStorage.getItem('classy_api_url') || window.CLASSY_API_URL || '';
+    const API_URL = 'http://localhost:5000/api';
 
     async function handleLogin(e) {
       e.preventDefault();
@@ -233,7 +232,6 @@
       const password = document.getElementById('password').value;
 
       try {
-        if (!API_URL) throw new Error('API URL is not configured');
         const res = await fetch(`${API_URL}/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
