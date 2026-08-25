@@ -286,7 +286,7 @@ function renderProductsTable(filter = '') {
     <tr>
       <td>
         <div class="table-product">
-          <img src="${p.image || 'https://via.placeholder.com/100'}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/100'">
+          <img src="${p.image || 'https://placehold.co/100'}" alt="${p.name}" onerror="this.src='https://placehold.co/100'">
           <div class="table-product-info"><h4>${p.name}</h4><p>ID: #${String(p._id).slice(-4)}</p></div>
         </div>
       </td>
@@ -318,7 +318,7 @@ function viewProduct(id) {
   const p = products.find(x => x._id == id);
   if (!p) return;
   document.getElementById('productViewBody').innerHTML = `
-    <div class="text-center mb-4"><img src="${p.image || 'https://via.placeholder.com/150'}" alt="${p.name}" style="width:150px;height:150px;object-fit:cover;border-radius:16px;" onerror="this.src='https://via.placeholder.com/150'"></div>
+    <div class="text-center mb-4"><img src="${p.image || 'https://placehold.co/150'}" alt="${p.name}" style="width:150px;height:150px;object-fit:cover;border-radius:16px;" onerror="this.src='https://placehold.co/150'"></div>
     <div class="space-y-3">
       <div class="flex justify-between p-3 bg-gray-50 rounded-xl"><span class="text-gray-500">الاسم:</span><span class="font-bold">${p.name}</span></div>
       <div class="flex justify-between p-3 bg-gray-50 rounded-xl"><span class="text-gray-500">التصنيف:</span><span class="font-bold">${p.category}</span></div>
@@ -604,7 +604,7 @@ function renderGalleryGrid() {
   if (!galleryItems.length) { grid.innerHTML = '<div class="col-span-full text-center py-10 text-gray-400">لا توجد صور</div>'; return; }
   grid.innerHTML = galleryItems.map(g => `
     <div class="gallery-item" style="position:relative;">
-      <img src="${g.image || g.img}" alt="${g.title}" style="width:100%;height:220px;object-fit:cover;border-radius:16px;" onerror="this.src='https://via.placeholder.com/400'">
+      <img src="${g.image || g.img}" alt="${g.title}" style="width:100%;height:220px;object-fit:cover;border-radius:16px;" onerror="this.src='https://placehold.co/400'">
       <div class="gallery-overlay" style="border-radius:16px;"><h4>${g.title}</h4><p>${g.desc || g.description} — ${g.category}</p></div>
       <div style="position:absolute;top:10px;left:10px;display:flex;gap:6px;">
         <button class="action-btn edit" onclick="editGalleryItem('${g._id}')" title="تعديل" style="background:rgba(255,255,255,0.9);"><i class="fas fa-edit"></i></button>
