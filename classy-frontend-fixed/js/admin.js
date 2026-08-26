@@ -2,20 +2,20 @@
 // CLASSY Admin Dashboard JavaScript
 // Connected to Backend API
 // ================================
-
-// API URL - can be configured via localStorage or defaults to localhost
+ 
+// API URL - can be configured via localStorage or defaults to the real backend
 function getApiUrl() {
   return localStorage.getItem('classy_api_url') || 'https://classy-backend.vercel.app/api';
 }
 const API_URL = getApiUrl();
-
+ 
 // ===== AUTH =====
 function getToken() { return localStorage.getItem('classy_admin_token'); }
 function getAuthHeaders() {
   const token = getToken();
   return token ? { 'Authorization': 'Bearer ' + token } : {};
 }
-
+ 
 // Check auth on load
 (function checkAuth() {
   const token = getToken();
@@ -26,19 +26,34 @@ function getAuthHeaders() {
     document.getElementById('sidebarAvatar').textContent = user.name.charAt(0);
   }
 })();
-
+ 
 function logout() {
   localStorage.removeItem('classy_admin_token');
   localStorage.removeItem('classy_admin_user');
   window.location.href = 'login.html';
 }
-
+ 
 // ===== API HELPERS =====
+// دالة مساعدة: تحاول تقرأ الرد كـ JSON، ولو مش JSON (زي صفحة خطأ HTML من السيرفر)
+// ترجع رسالة خطأ واضحة فيها كود الحالة وأول جزء من محتوى الرد عشان نقدر نشخص المشكلة
+async function parseApiResponse(res) {
+  const text = await res.text();
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    console.error('استجابة السيرفر مش JSON:', res.status, text.slice(0, 300));
+    return {
+      success: false,
+      error: `السيرفر رجّع رد غير متوقع (كود ${res.status}). تأكد إن رابط الـ API صحيح والباك اند شغال. تفاصيل: ${text.slice(0, 150) || 'رد فاضي'}`
+    };
+  }
+}
+ 
 async function apiGet(endpoint) {
   try {
     const res = await fetch(getApiUrl() + endpoint, { headers: getAuthHeaders() });
-    return await res.json();
-  } catch (e) { return { success: false, error: e.message }; }
+    return await parseApiResponse(res);
+  } catch (e) { return { success: false, error: 'تعذر الاتصال بالسيرفر: ' + e.message }; }
 }
 async function apiPostForm(endpoint, formData) {
   try {
@@ -47,8 +62,8 @@ async function apiPostForm(endpoint, formData) {
       headers: getAuthHeaders(), // Don't set Content-Type - browser sets it with boundary for FormData
       body: formData
     });
-    return await res.json();
-  } catch (e) { return { success: false, error: e.message }; }
+    return await parseApiResponse(res);
+  } catch (e) { return { success: false, error: 'تعذر الاتصال بالسيرفر: ' + e.message }; }
 }
 async function apiPutForm(endpoint, formData) {
   try {
@@ -57,20 +72,20 @@ async function apiPutForm(endpoint, formData) {
       headers: getAuthHeaders(),
       body: formData
     });
-    return await res.json();
-  } catch (e) { return { success: false, error: e.message }; }
+    return await parseApiResponse(res);
+  } catch (e) { return { success: false, error: 'تعذر الاتصال بالسيرفر: ' + e.message }; }
 }
 async function apiDelete(endpoint) {
   try {
     const res = await fetch(getApiUrl() + endpoint, { method: 'DELETE', headers: getAuthHeaders() });
-    return await res.json();
-  } catch (e) { return { success: false, error: e.message }; }
+    return await parseApiResponse(res);
+  } catch (e) { return { success: false, error: 'تعذر الاتصال بالسيرفر: ' + e.message }; }
 }
-
+ 
 // ===== DEMO DATA (Fallback) =====
 let products = [], orders = [], customers = [], galleryItems = [];
 let categories = [];
-
+ 
 const DEMO_PRODUCTS = [
   { _id: 'p1', name: 'كتاب تلوين Mandala', category: 'كتب تلوين', price: 120, stock: 25, status: 'active', rating: 4.9, reviews: 45, image: 'https://images.unsplash.com/photo-1513519245088-0e12902e35ca?w=100&h=100&fit=crop', description: 'كتاب تلوين فاخر' },
   { _id: 'p2', name: 'بوكس ورد مجفف', category: 'بوكسات ورد', price: 350, stock: 10, status: 'active', rating: 4.8, reviews: 32, image: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=100&h=100&fit=crop', description: 'بوكس خشبي أنيق' },
@@ -78,7 +93,7 @@ const DEMO_PRODUCTS = [
   { _id: 'p4', name: 'تغريسة تخرج Senior', category: 'تغريسات تخرج', price: 60, stock: 50, status: 'active', rating: 4.9, reviews: 65, image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=100&h=100&fit=crop', description: 'تغريسة خشبية' },
   { _id: 'p5', name: 'برواز مولود', category: 'براويز مواليد', price: 200, stock: 15, status: 'active', rating: 5.0, reviews: 40, image: 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=100&h=100&fit=crop', description: 'برواز تفاصيل الميلاد' },
 ];
-
+ 
 const DEMO_ORDERS = [
   { _id: 'o1', orderNumber: '#ORD00001', customer: { name: 'فاطمة محمد', phone: '201226832747', email: 'fatima@example.com', address: 'القاهرة، مصر الجديدة' }, items: [{ productName: 'بوكس ورد مجفف', quantity: 1, price: 350 }, { productName: 'نوتة Van Gogh', quantity: 1, price: 85 }], totalPrice: 435, paymentMethod: 'cash_on_delivery', shippingMethod: 'standard', status: 'pending', notes: 'يرجى التواصل قبل التوصيل', date: '23 أغسطس 2026' },
   { _id: 'o2', orderNumber: '#ORD00002', customer: { name: 'نور أحمد', phone: '201111111111', email: 'nour@example.com', address: 'الإسكندرية، سموحة' }, items: [{ productName: 'كتاب تلوين Mandala', quantity: 1, price: 120 }], totalPrice: 120, paymentMethod: 'cash_on_delivery', shippingMethod: 'express', status: 'processing', notes: '', date: '22 أغسطس 2026' },
@@ -87,7 +102,7 @@ const DEMO_ORDERS = [
   { _id: 'o5', orderNumber: '#ORD00005', customer: { name: 'محمد حسن', phone: '201444444444', email: 'mohamed@example.com', address: 'القاهرة، المعادي' }, items: [{ productName: 'تغريسة تخرج', quantity: 5, price: 60 }], totalPrice: 300, paymentMethod: 'cash_on_delivery', shippingMethod: 'express', status: 'processing', notes: '5 تغريسات', date: '19 أغسطس 2026' },
   { _id: 'o6', orderNumber: '#ORD00006', customer: { name: 'ليلى سامي', phone: '201555555555', email: 'laila@example.com', address: 'طنطا، شارع الجيش' }, items: [{ productName: 'كتاب تلوين', quantity: 2, price: 120 }, { productName: 'نوتة', quantity: 1, price: 85 }], totalPrice: 325, paymentMethod: 'online', shippingMethod: 'standard', status: 'cancelled', notes: 'ألغى العميل', date: '18 أغسطس 2026' },
 ];
-
+ 
 const DEMO_CUSTOMERS = [
   { _id: 'c1', name: 'فاطمة محمد', email: 'fatima@example.com', phone: '201226832747', address: 'القاهرة، مصر', orders: 5, total: 1250, date: '15 يناير 2026' },
   { _id: 'c2', name: 'نور أحمد', email: 'nour@example.com', phone: '201111111111', address: 'الإسكندرية، مصر', orders: 3, total: 680, date: '20 فبراير 2026' },
@@ -95,14 +110,14 @@ const DEMO_CUSTOMERS = [
   { _id: 'c4', name: 'سارة علي', email: 'sara@example.com', phone: '201333333333', address: 'القاهرة، مصر', orders: 2, total: 870, date: '10 أبريل 2026' },
   { _id: 'c5', name: 'محمد حسن', email: 'mohamed@example.com', phone: '201444444444', address: 'القاهرة، مصر', orders: 4, total: 1500, date: '25 مايو 2026' },
 ];
-
+ 
 const DEMO_GALLERY = [
   { _id: 'g1', title: 'كتاب تلوين', desc: 'Mandala Design', category: 'كتب تلوين', image: 'https://images.unsplash.com/photo-1513519245088-0e12902e35ca?w=400&h=400&fit=crop' },
   { _id: 'g2', title: 'بوكس ورد', desc: 'ورد مجفف وردي', category: 'بوكسات ورد', image: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=400&h=400&fit=crop' },
   { _id: 'g3', title: 'نوتة مخصصة', desc: 'Van Gogh Design', category: 'نوتات مخصصة', image: 'https://images.unsplash.com/photo-1544816155-12df9643f363?w=400&h=400&fit=crop' },
   { _id: 'g4', title: 'تغريسة تخرج', desc: 'Senior 2026', category: 'تغريسات تخرج', image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=400&h=400&fit=crop' },
 ];
-
+ 
 // ===== STATUS CONFIG =====
 const STATUS_CONFIG = {
   pending:    { label: 'قيد المراجعة', class: 'status-badge pending', icon: '⏳' },
@@ -112,10 +127,10 @@ const STATUS_CONFIG = {
 };
 const PAYMENT_LABELS = { cash_on_delivery: 'الدفع عند الاستلام', online: 'دفع إلكتروني' };
 const SHIPPING_LABELS = { standard: 'شحن عادي', express: 'شحن سريع' };
-
+ 
 // ===== SIDEBAR =====
 function toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
-
+ 
 function showSection(sectionName) {
   const sections = ['dashboard', 'products', 'orders', 'customers', 'gallery', 'settings'];
   sections.forEach(s => { const el = document.getElementById(s + 'Section'); if (el) el.style.display = 'none'; });
@@ -131,14 +146,14 @@ function showSection(sectionName) {
   if (sectionName === 'customers') loadCustomers();
   if (sectionName === 'gallery') loadGallery();
 }
-
+ 
 // ===== MODALS =====
 function openModal(modalId) { document.getElementById(modalId).classList.add('open'); }
 function closeModal(modalId) { document.getElementById(modalId).classList.remove('open'); }
 document.querySelectorAll('.modal-overlay').forEach(overlay => {
   overlay.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });
 });
-
+ 
 // ===== TOAST =====
 function showToast(message, type = 'success') {
   const toast = document.getElementById('toast');
@@ -148,13 +163,13 @@ function showToast(message, type = 'success') {
   toast.classList.add('show');
   setTimeout(() => { toast.classList.remove('show'); }, 3000);
 }
-
+ 
 // ===== IMAGE UPLOAD HELPERS =====
 function handleImagePreview(input) {
   const file = input.files[0];
   if (!file) return;
   if (file.size > 5 * 1024 * 1024) { showToast('حجم الصورة كبير جداً! الحد الأقصى 5MB', 'error'); input.value = ''; return; }
-
+ 
   const reader = new FileReader();
   reader.onload = function(e) {
     document.getElementById('imagePreview').src = e.target.result;
@@ -166,14 +181,14 @@ function handleImagePreview(input) {
   };
   reader.readAsDataURL(file);
 }
-
+ 
 function removeImagePreview() {
   document.getElementById('prodImageFile').value = '';
   document.getElementById('imagePreview').style.display = 'none';
   document.getElementById('imagePreviewArea').style.display = 'block';
   document.getElementById('removeImageBtn').style.display = 'none';
 }
-
+ 
 function handleUrlPreview(url) {
   if (!url) return;
   document.getElementById('imagePreview').src = url;
@@ -183,7 +198,7 @@ function handleUrlPreview(url) {
   // Clear file input since we have URL
   document.getElementById('prodImageFile').value = '';
 }
-
+ 
 // ===== LOAD DATA =====
 async function loadAllData() {
   const prodRes = await apiGet('/products');
@@ -195,7 +210,7 @@ async function loadAllData() {
   const galRes = await apiGet('/gallery');
   galleryItems = galRes.success && galRes.data ? galRes.data : DEMO_GALLERY;
   customers = extractCustomersFromOrders();
-
+ 
   renderDashboardOrders();
   renderProductsTable();
   renderOrdersTable();
@@ -204,7 +219,7 @@ async function loadAllData() {
   updateDashboardStats();
   initCharts();
 }
-
+ 
 function extractCustomersFromOrders() {
   const map = {};
   orders.forEach(o => {
@@ -217,7 +232,7 @@ function extractCustomersFromOrders() {
   });
   return Object.values(map);
 }
-
+ 
 // ===== DASHBOARD =====
 function renderDashboardOrders() {
   const tbody = document.getElementById('dashboardOrdersBody');
@@ -239,7 +254,7 @@ function renderDashboardOrders() {
     </tr>
   `).join('');
 }
-
+ 
 function updateDashboardStats() {
   const totalOrders = orders.length;
   const totalProducts = products.filter(p => p.status === 'active').length;
@@ -250,7 +265,7 @@ function updateDashboardStats() {
   if (document.getElementById('dashTotalProducts')) animateNumber(document.getElementById('dashTotalProducts'), totalProducts);
   if (document.getElementById('dashTotalSales')) animateNumber(document.getElementById('dashTotalSales'), totalSales);
 }
-
+ 
 function animateNumber(el, target) {
   let current = 0;
   const step = Math.ceil(target / 30);
@@ -260,28 +275,28 @@ function animateNumber(el, target) {
     el.textContent = current.toLocaleString();
   }, 20);
 }
-
+ 
 function formatDate(d) {
   if (!d) return '—';
   const date = new Date(d);
   if (isNaN(date)) return d;
   return date.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
 }
-
+ 
 // ===== PRODUCTS =====
 async function loadProducts() {
   const res = await apiGet('/products');
   if (res.success && res.data) products = res.data;
   renderProductsTable();
 }
-
+ 
 function renderProductsTable(filter = '') {
   const tbody = document.getElementById('productsTableBody');
   if (!tbody) return;
   let list = products;
   if (filter) list = products.filter(p => p.name.includes(filter) || p.category.includes(filter));
   if (!list.length) { tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-gray-400">لا توجد منتجات</td></tr>'; return; }
-
+ 
   tbody.innerHTML = list.map(p => `
     <tr>
       <td>
@@ -303,9 +318,9 @@ function renderProductsTable(filter = '') {
     </tr>
   `).join('');
 }
-
+ 
 function filterProductsTable() { renderProductsTable(document.getElementById('productSearch')?.value || ''); }
-
+ 
 function openProductModal() {
   document.getElementById('productModalTitle').textContent = 'إضافة منتج جديد';
   document.getElementById('productEditId').value = '';
@@ -313,7 +328,7 @@ function openProductModal() {
   removeImagePreview();
   openModal('productModal');
 }
-
+ 
 function viewProduct(id) {
   const p = products.find(x => x._id == id);
   if (!p) return;
@@ -330,7 +345,7 @@ function viewProduct(id) {
   `;
   openModal('productViewModal');
 }
-
+ 
 function editProduct(id) {
   const p = products.find(x => x._id == id);
   if (!p) return;
@@ -341,7 +356,7 @@ function editProduct(id) {
   document.getElementById('prodStock').value = p.stock;
   document.getElementById('prodCategory').value = p.category;
   document.getElementById('prodDesc').value = p.description || '';
-
+ 
   // Show existing image
   if (p.image) {
     document.getElementById('imagePreview').src = p.image;
@@ -354,7 +369,7 @@ function editProduct(id) {
   }
   openModal('productModal');
 }
-
+ 
 async function saveProduct() {
   const id = document.getElementById('productEditId').value;
   const name = document.getElementById('prodName').value.trim();
@@ -364,12 +379,12 @@ async function saveProduct() {
   const description = document.getElementById('prodDesc').value.trim();
   const imageFile = document.getElementById('prodImageFile').files[0];
   const imageUrl = document.getElementById('prodImageUrl').value.trim();
-
+ 
   if (!name || !price || !stock || !category) {
     showToast('يرجى ملء جميع الحقول المطلوبة!', 'error');
     return;
   }
-
+ 
   // Build FormData for multipart upload
   const formData = new FormData();
   formData.append('name', name);
@@ -378,14 +393,14 @@ async function saveProduct() {
   formData.append('category', category);
   formData.append('description', description);
   formData.append('status', 'active');
-
+ 
   // If user selected a file, upload it. Otherwise use URL if provided
   if (imageFile) {
     formData.append('image', imageFile);
   } else if (imageUrl) {
     formData.append('image', imageUrl);
   }
-
+ 
   let res;
   if (id) {
     res = await apiPutForm('/products/' + id, formData);
@@ -395,13 +410,13 @@ async function saveProduct() {
     if (res.success) showToast('تم إضافة المنتج بنجاح!', 'success');
   }
   if (!res.success) showToast(res.message || res.error || 'حدث خطأ', 'error');
-
+ 
   closeModal('productModal');
   removeImagePreview();
   await loadProducts();
   updateDashboardStats();
 }
-
+ 
 // ===== ORDERS =====
 async function loadOrders() {
   const res = await apiGet('/orders');
@@ -409,7 +424,7 @@ async function loadOrders() {
   customers = extractCustomersFromOrders();
   renderOrdersTable();
 }
-
+ 
 function renderOrdersTable(filterText = '', statusFilter = 'all') {
   const tbody = document.getElementById('ordersTableBody');
   if (!tbody) return;
@@ -417,7 +432,7 @@ function renderOrdersTable(filterText = '', statusFilter = 'all') {
   if (filterText) list = list.filter(o => (o.orderNumber || '').includes(filterText) || o.customer.name.includes(filterText) || o.customer.phone.includes(filterText));
   if (statusFilter !== 'all') list = list.filter(o => o.status === statusFilter);
   if (!list.length) { tbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-gray-400">لا توجد طلبات</td></tr>'; return; }
-
+ 
   tbody.innerHTML = list.map(o => `
     <tr>
       <td class="font-bold text-primary-dark">${o.orderNumber}</td>
@@ -436,11 +451,11 @@ function renderOrdersTable(filterText = '', statusFilter = 'all') {
     </tr>
   `).join('');
 }
-
+ 
 function filterOrdersTable() { renderOrdersTable(document.getElementById('orderSearch')?.value || '', document.getElementById('orderStatusFilter')?.value || 'all'); }
-
+ 
 let currentViewOrderId = null;
-
+ 
 function viewOrder(id) {
   const o = orders.find(x => x._id == id);
   if (!o) return;
@@ -493,7 +508,7 @@ function viewOrder(id) {
   `;
   openModal('orderViewModal');
 }
-
+ 
 function editOrder(id) {
   const o = orders.find(x => x._id == id);
   if (!o) return;
@@ -517,9 +532,9 @@ function editOrder(id) {
   `).join('');
   openModal('orderEditModal');
 }
-
+ 
 function openEditFromView() { closeModal('orderViewModal'); if (currentViewOrderId) editOrder(currentViewOrderId); }
-
+ 
 async function saveOrderEdit() {
   const id = document.getElementById('editOrderId').value;
   const body = {
@@ -545,17 +560,17 @@ async function saveOrderEdit() {
     showToast(res.message || 'حدث خطأ', 'error');
   }
 }
-
+ 
 // ===== CUSTOMERS =====
 function loadCustomers() { customers = extractCustomersFromOrders(); renderCustomersTable(); }
-
+ 
 function renderCustomersTable(filter = '') {
   const tbody = document.getElementById('customersTableBody');
   if (!tbody) return;
   let list = customers;
   if (filter) list = customers.filter(c => c.name.includes(filter) || c.phone.includes(filter));
   if (!list.length) { tbody.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-gray-400">لا يوجد عملاء</td></tr>'; return; }
-
+ 
   tbody.innerHTML = list.map(c => `
     <tr>
       <td><div class="table-product"><div class="user-avatar" style="width:40px;height:40px;border-radius:10px;">${c.name.charAt(0)}</div><div class="table-product-info"><h4>${c.name}</h4></div></div></td>
@@ -572,9 +587,9 @@ function renderCustomersTable(filter = '') {
     </tr>
   `).join('');
 }
-
+ 
 function filterCustomersTable() { renderCustomersTable(document.getElementById('customerSearch')?.value || ''); }
-
+ 
 function viewCustomer(id) {
   const c = customers.find(x => x._id == id);
   if (!c) return;
@@ -590,14 +605,14 @@ function viewCustomer(id) {
   `;
   openModal('customerViewModal');
 }
-
+ 
 // ===== GALLERY =====
 async function loadGallery() {
   const res = await apiGet('/gallery');
   if (res.success && res.data) galleryItems = res.data;
   renderGalleryGrid();
 }
-
+ 
 function renderGalleryGrid() {
   const grid = document.getElementById('galleryGrid');
   if (!grid) return;
@@ -613,14 +628,14 @@ function renderGalleryGrid() {
     </div>
   `).join('');
 }
-
+ 
 function openGalleryModal() {
   document.getElementById('galleryModalTitle').textContent = 'إضافة صورة للمعرض';
   document.getElementById('galleryEditId').value = '';
   ['galTitle','galDesc','galCategory','galImage'].forEach(id => document.getElementById(id).value = '');
   openModal('galleryModal');
 }
-
+ 
 function editGalleryItem(id) {
   const g = galleryItems.find(x => x._id == id);
   if (!g) return;
@@ -632,21 +647,21 @@ function editGalleryItem(id) {
   document.getElementById('galImage').value = g.image || g.img || '';
   openModal('galleryModal');
 }
-
+ 
 async function saveGalleryItem() {
   const id = document.getElementById('galleryEditId').value;
   const body = { title: document.getElementById('galTitle').value.trim(), description: document.getElementById('galDesc').value.trim(), category: document.getElementById('galCategory').value.trim(), image: document.getElementById('galImage').value.trim() };
   if (!body.title || !body.category) { showToast('يرجى ملء الحقول المطلوبة!', 'error'); return; }
-
+ 
   let res;
   if (id) { res = await apiPutForm('/gallery/' + id, new URLSearchParams(body)); if (res.success) showToast('تم تعديل الصورة!', 'success'); }
   else { res = await apiPostForm('/gallery', new URLSearchParams(body)); if (res.success) showToast('تم إضافة الصورة!', 'success'); }
   if (!res.success) showToast(res.message || 'حدث خطأ', 'error');
-
+ 
   closeModal('galleryModal');
   await loadGallery();
 }
-
+ 
 // ===== DELETE =====
 let deleteTarget = { type: null, id: null };
 function promptDelete(type, id) {
@@ -655,7 +670,7 @@ function promptDelete(type, id) {
   document.getElementById('deleteConfirmText').textContent = `سيتم حذف ${names[type]} نهائياً.`;
   openModal('deleteConfirmModal');
 }
-
+ 
 async function confirmDelete() {
   const { type, id } = deleteTarget;
   let res;
@@ -679,11 +694,11 @@ async function confirmDelete() {
   closeModal('deleteConfirmModal');
   showToast(res?.success ? 'تم الحذف بنجاح!' : (res?.message || 'حدث خطأ'), res?.success ? 'success' : 'error');
 }
-
+ 
 // ===== CHARTS =====
 let salesChartInstance = null;
 let ordersChartInstance = null;
-
+ 
 function initCharts() {
   const salesCtx = document.getElementById('salesChart');
   if (salesCtx) {
@@ -717,7 +732,7 @@ function initCharts() {
       }
     });
   }
-
+ 
   const ordersCtx = document.getElementById('ordersChart');
   if (ordersCtx) {
     if (ordersChartInstance) ordersChartInstance.destroy();
@@ -729,8 +744,8 @@ function initCharts() {
     });
   }
 }
-
-
+ 
+ 
 // ===== SETTINGS API =====
 async function loadSettings() {
   const res = await apiGet('/settings');
@@ -746,15 +761,15 @@ async function loadSettings() {
   }
   return {};
 }
-
+ 
 async function saveSetting(key, value) {
   const res = await apiPutForm('/settings', new URLSearchParams({ key, value }));
   if (res.success) showToast('تم حفظ الإعداد!', 'success');
   else showToast(res.message || 'حدث خطأ', 'error');
   return res;
 }
-
-
+ 
+ 
 // ===== API CONFIG =====
 function saveApiUrl() {
   const url = document.getElementById('apiUrlInput')?.value.trim();
@@ -764,24 +779,32 @@ function saveApiUrl() {
   showToast('تم حفظ رابط السيرفر! جاري إعادة التحميل...', 'success');
   setTimeout(() => location.reload(), 1000);
 }
-
+ 
 async function testApiConnection() {
   const resultDiv = document.getElementById('apiTestResult');
   if (!resultDiv) return;
   resultDiv.innerHTML = '<span class="text-blue-500">جاري الاختبار...</span>';
+  const healthUrl = getApiUrl().replace(/\/api\/?$/, '') + '/api/health';
   try {
-    const res = await fetch(getApiUrl().replace('/api', '') + '/api/health');
-    const data = await res.json();
-    if (data.success) {
+    const res = await fetch(healthUrl);
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); }
+    catch (parseErr) {
+      resultDiv.innerHTML = `<span class="text-red-500"><i class="fas fa-times-circle"></i> السيرفر رد بكود ${res.status} لكن الرد مش JSON. ممكن يكون مسار /api/health مش موجود في الباك اند أصلاً (مش بالضرورة مشكلة في باقي الـ API). تفاصيل الرد: ${text.slice(0, 150) || 'فاضي'}</span>`;
+      return;
+    }
+    if (res.ok && data.success) {
       resultDiv.innerHTML = '<span class="text-green-500"><i class="fas fa-check-circle"></i> الاتصال ناجح! السيرفر يعمل.</span>';
     } else {
-      resultDiv.innerHTML = '<span class="text-yellow-500">⚠️ السيرفر رد بس فيه مشكلة.</span>';
+      resultDiv.innerHTML = `<span class="text-yellow-500">⚠️ السيرفر رد بكود ${res.status} بس فيه مشكلة: ${data.message || data.error || 'غير معروف'}</span>`;
     }
   } catch (e) {
-    resultDiv.innerHTML = '<span class="text-red-500"><i class="fas fa-times-circle"></i> فشل الاتصال. تأكد من الرابط.</span>';
+    console.error('API health check failed:', healthUrl, e);
+    resultDiv.innerHTML = `<span class="text-red-500"><i class="fas fa-times-circle"></i> فشل الاتصال بالكامل (${e.message}). الاحتمالات: الرابط غلط، السيرفر واقف، أو مشكلة CORS بتمنع المتصفح من قراءة الرد. افتح Console (F12) وشوف الرسالة الكاملة.</span>`;
   }
 }
-
+ 
 async function saveAllSettings() {
   const settings = {
     store_name: document.getElementById('settingsStoreName')?.value || 'CLASSY',
@@ -797,7 +820,7 @@ async function saveAllSettings() {
     shipping_standard_days: document.getElementById('settingsShippingStandardDays')?.value || '3',
     shipping_express_days: document.getElementById('settingsShippingExpressDays')?.value || '1',
   };
-
+ 
   const res = await apiPutForm('/settings/bulk', new URLSearchParams(settings));
   if (res.success) {
     showToast('تم حفظ جميع الإعدادات بنجاح!', 'success');
@@ -807,7 +830,7 @@ async function saveAllSettings() {
     showToast('تم حفظ الإعدادات محلياً (لا يوجد سيرفر)', 'success');
   }
 }
-
+ 
 async function loadSettingsToForm() {
   const res = await apiGet('/settings');
   if (res.success && res.data) {
@@ -828,16 +851,16 @@ async function loadSettingsToForm() {
     // Load from localStorage fallback
     if (document.getElementById('settingsWhatsapp')) document.getElementById('settingsWhatsapp').value = localStorage.getItem('classy_setting_whatsapp_number') || '201226832747';
   }
-
+ 
   // Load API URL
   const savedApi = localStorage.getItem('classy_api_url');
   if (savedApi && document.getElementById('apiUrlInput')) {
     document.getElementById('apiUrlInput').value = savedApi;
   }
 }
-
+ 
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', function() { loadAllData(); });
-
+ 
 // Mobile sidebar
 toggleMobileSidebar = function() { document.getElementById('sidebar').classList.toggle('open'); }
