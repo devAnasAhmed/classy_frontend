@@ -21,12 +21,9 @@ function getAuthHeaders() {
   const token = getToken();
   if (!token) { window.location.href = 'login.html'; return; }
   const user = JSON.parse(localStorage.getItem('classy_admin_user') || '{}');
-  // لو المدير غيّر اسمه من قبل، الاسم المحفوظ ده بيبقى له الأولوية
-  const savedName = localStorage.getItem('classy_manager_name');
-  const displayName = savedName || user.name;
-  if (displayName) {
-    document.getElementById('sidebarName').textContent = displayName;
-    document.getElementById('sidebarAvatar').textContent = displayName.charAt(0);
+  if (user.name) {
+    document.getElementById('sidebarName').textContent = user.name;
+    document.getElementById('sidebarAvatar').textContent = user.name.charAt(0);
   }
 })();
 
@@ -59,16 +56,6 @@ async function apiPutForm(endpoint, formData) {
       method: 'PUT',
       headers: getAuthHeaders(),
       body: formData
-    });
-    return await res.json();
-  } catch (e) { return { success: false, error: e.message }; }
-}
-async function apiPutJSON(endpoint, dataObject) {
-  try {
-    const res = await fetch(getApiUrl() + endpoint, {
-      method: 'PUT',
-      headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-      body: JSON.stringify(dataObject)
     });
     return await res.json();
   } catch (e) { return { success: false, error: e.message }; }
@@ -127,16 +114,7 @@ const PAYMENT_LABELS = { cash_on_delivery: 'الدفع عند الاستلام',
 const SHIPPING_LABELS = { standard: 'شحن عادي', express: 'شحن سريع' };
 
 // ===== SIDEBAR =====
-// تم التعديل: نفس الزرار بقى يفتح/يقفل صح على الموبايل (كلاس open)
-// وعلى الديسكتوب بيصغّر/يكبّر (كلاس collapsed) - زي ما كان بالظبط
-function toggleSidebar() {
-  const sidebar = document.getElementById('sidebar');
-  if (window.innerWidth <= 768) {
-    sidebar.classList.toggle('open');
-  } else {
-    sidebar.classList.toggle('collapsed');
-  }
-}
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
 
 function showSection(sectionName) {
   const sections = ['dashboard', 'products', 'orders', 'customers', 'gallery', 'settings'];
@@ -153,11 +131,6 @@ function showSection(sectionName) {
   if (sectionName === 'customers') loadCustomers();
   if (sectionName === 'gallery') loadGallery();
   if (sectionName === 'settings') loadSettingsToForm();
-
-  // على الموبايل: نقفل القايمة تلقائي بعد اختيار قسم عشان المحتوى يبان
-  if (window.innerWidth <= 768) {
-    document.getElementById('sidebar').classList.remove('open');
-  }
 }
 
 // ===== MODALS =====
@@ -384,6 +357,10 @@ function editProduct(id) {
 }
 
 async function saveProduct() {
+  const saveBtn = document.getElementById('saveProductBtn');
+  // منع الضغط المتكرر: لو الزرار مقفول معناه فيه طلب شغال بالفعل
+  if (saveBtn && saveBtn.disabled) return;
+
   const id = document.getElementById('productEditId').value;
   const name = document.getElementById('prodName').value.trim();
   const price = parseFloat(document.getElementById('prodPrice').value);
@@ -396,6 +373,12 @@ async function saveProduct() {
   if (!name || !price || !stock || !category) {
     showToast('يرجى ملء جميع الحقول المطلوبة!', 'error');
     return;
+  }
+
+  const originalBtnText = saveBtn ? saveBtn.innerHTML : '';
+  if (saveBtn) {
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
   }
 
   // Build FormData for multipart upload
@@ -414,20 +397,29 @@ async function saveProduct() {
     formData.append('image', imageUrl);
   }
 
-  let res;
-  if (id) {
-    res = await apiPutForm('/products/' + id, formData);
-    if (res.success) showToast('تم تعديل المنتج بنجاح!', 'success');
-  } else {
-    res = await apiPostForm('/products', formData);
-    if (res.success) showToast('تم إضافة المنتج بنجاح!', 'success');
-  }
-  if (!res.success) showToast(res.message || res.error || 'حدث خطأ', 'error');
+  try {
+    let res;
+    if (id) {
+      res = await apiPutForm('/products/' + id, formData);
+      if (res.success) showToast('تم تعديل المنتج بنجاح!', 'success');
+    } else {
+      res = await apiPostForm('/products', formData);
+      if (res.success) showToast('تم إضافة المنتج بنجاح!', 'success');
+    }
+    if (!res.success) showToast(res.message || res.error || 'حدث خطأ', 'error');
 
-  closeModal('productModal');
-  removeImagePreview();
-  await loadProducts();
-  updateDashboardStats();
+    if (res.success) {
+      closeModal('productModal');
+      removeImagePreview();
+    }
+    await loadProducts();
+    updateDashboardStats();
+  } finally {
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = originalBtnText;
+    }
+  }
 }
 
 // ===== ORDERS =====
@@ -562,7 +554,7 @@ async function saveOrderEdit() {
     status: document.getElementById('editOrderStatus').value,
     notes: document.getElementById('editOrderNotes').value.trim()
   };
-  const res = await apiPutJSON('/orders/' + id, body); // JSON عشان customer object متداخل ومتبعتش صح مع URLSearchParams
+  const res = await apiPutForm('/orders/' + id, new URLSearchParams(body)); // orders don't have file upload
   if (res.success) {
     showToast('تم تحديث الطلب بنجاح!', 'success');
     closeModal('orderEditModal');
@@ -712,51 +704,17 @@ async function confirmDelete() {
 let salesChartInstance = null;
 let ordersChartInstance = null;
 
-const ARABIC_MONTHS = { 'يناير':0,'فبراير':1,'مارس':2,'أبريل':3,'مايو':4,'يونيو':5,'يوليو':6,'أغسطس':7,'سبتمبر':8,'أكتوبر':9,'نوفمبر':10,'ديسمبر':11 };
-
-// بيقرأ التاريخ سواء جاي ISO من السيرفر أو نص عربي زي "23 أغسطس 2026"
-function parseOrderDate(raw) {
-  if (!raw) return null;
-  let d = new Date(raw);
-  if (!isNaN(d)) return d;
-  const parts = String(raw).trim().split(' ');
-  if (parts.length === 3 && ARABIC_MONTHS[parts[1]] !== undefined) {
-    return new Date(parseInt(parts[2]), ARABIC_MONTHS[parts[1]], parseInt(parts[0]));
-  }
-  return null;
-}
-
-// بيحسب إجمالي المبيعات الحقيقي لكل شهر من آخر monthsCount شهر (بيستبعد الطلبات الملغية)
-function calculateMonthlySales(monthsCount = 8) {
-  const now = new Date();
-  const monthNames = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
-  const buckets = [];
-  for (let i = monthsCount - 1; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    buckets.push({ year: d.getFullYear(), month: d.getMonth(), label: monthNames[d.getMonth()], total: 0 });
-  }
-  orders.forEach(o => {
-    if (o.status === 'cancelled') return;
-    const d = parseOrderDate(o.createdAt || o.date);
-    if (!d) return;
-    const bucket = buckets.find(b => b.year === d.getFullYear() && b.month === d.getMonth());
-    if (bucket) bucket.total += (o.totalPrice || 0);
-  });
-  return { labels: buckets.map(b => b.label), data: buckets.map(b => b.total) };
-}
-
 function initCharts() {
   const salesCtx = document.getElementById('salesChart');
   if (salesCtx) {
     if (salesChartInstance) salesChartInstance.destroy();
-    const { labels: salesLabels, data: salesData } = calculateMonthlySales(8);
     salesChartInstance = new Chart(salesCtx, {
       type: 'line',
       data: {
-        labels: salesLabels,
+        labels: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس'],
         datasets: [{
           label: 'المبيعات (EGP)',
-          data: salesData,
+          data: [12000, 15000, 18000, 14000, 22000, 25000, 21000, 24580],
           borderColor: '#C8A2C8',
           backgroundColor: 'rgba(200, 162, 200, 0.1)',
           borderWidth: 3,
@@ -844,25 +802,6 @@ async function testApiConnection() {
   }
 }
 
-// ===== MANAGER NAME (sidebar display name) =====
-function saveManagerName() {
-  const input = document.getElementById('settingsManagerName');
-  const name = input?.value.trim();
-  if (!name) { showToast('يرجى إدخال اسم المدير!', 'error'); return; }
-
-  localStorage.setItem('classy_manager_name', name);
-
-  // تحديث الاسم كمان جوه بيانات المستخدم المحفوظة عشان يفضل متزامن
-  const user = JSON.parse(localStorage.getItem('classy_admin_user') || '{}');
-  user.name = name;
-  localStorage.setItem('classy_admin_user', JSON.stringify(user));
-
-  document.getElementById('sidebarName').textContent = name;
-  document.getElementById('sidebarAvatar').textContent = name.charAt(0);
-
-  showToast('تم تحديث اسم المدير بنجاح!', 'success');
-}
-
 async function saveAllSettings() {
   const settings = {
     store_name: document.getElementById('settingsStoreName')?.value || 'CLASSY',
@@ -890,13 +829,6 @@ async function saveAllSettings() {
 }
 
 async function loadSettingsToForm() {
-  // تحميل اسم المدير الحالي في حقل الإعدادات لو موجود
-  if (document.getElementById('settingsManagerName')) {
-    const savedName = localStorage.getItem('classy_manager_name');
-    const user = JSON.parse(localStorage.getItem('classy_admin_user') || '{}');
-    document.getElementById('settingsManagerName').value = savedName || user.name || '';
-  }
-
   const res = await apiGet('/settings');
   if (res.success && res.data) {
     const s = res.data;
@@ -927,5 +859,5 @@ async function loadSettingsToForm() {
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', function() { loadAllData(); });
 
-// Mobile sidebar (kept for compatibility if any button still calls this directly)
+// Mobile sidebar
 toggleMobileSidebar = function() { document.getElementById('sidebar').classList.toggle('open'); }
