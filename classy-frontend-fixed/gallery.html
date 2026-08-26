@@ -48,44 +48,21 @@
     </div>
   </section>
 
-  <!-- <section class="py-16">
-  
+  <section class="py-16">
+    <div class="container mx-auto px-4">
+      <div class="flex flex-wrap justify-center gap-3 mb-10">
+        <button class="filter-btn active" onclick="filterGallery('all')">الكل</button>
+        <button class="filter-btn" onclick="filterGallery('كتب تلوين')">كتب تلوين</button>
+        <button class="filter-btn" onclick="filterGallery('بوكسات ورد')">بوكسات ورد</button>
+        <button class="filter-btn" onclick="filterGallery('نوتات مخصصة')">نوتات مخصصة</button>
+        <button class="filter-btn" onclick="filterGallery('تغريسات تخرج')">تغريسات تخرج</button>
+        <button class="filter-btn" onclick="filterGallery('براويز مواليد')">براويز مواليد</button>
+      </div>
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="galleryContainer">
-        <div class="gallery-item" data-category="coloring-books">
-          <img src="https://images.unsplash.com/photo-1513519245088-0e12902e35ca?w=400&h=400&fit=crop" alt="Coloring Book">
-          <div class="gallery-overlay"><h4>كتاب تلوين Mandala</h4><p>تصميم هندسي معقد</p></div>
-        </div>
-        <div class="gallery-item" data-category="flower-boxes">
-          <img src="https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=400&h=400&fit=crop" alt="Flower Box">
-          <div class="gallery-overlay"><h4>بوكس ورد مجفف</h4><p>هدية زفاف مخصصة</p></div>
-        </div>
-        <div class="gallery-item" data-category="notebooks">
-          <img src="https://images.unsplash.com/photo-1544816155-12df9643f363?w=400&h=400&fit=crop" alt="Notebook">
-          <div class="gallery-overlay"><h4>نوتة Van Gogh</h4><p>تصميم فني مخصص</p></div>
-        </div>
-        <div class="gallery-item" data-category="graduation">
-          <img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=400&h=400&fit=crop" alt="Graduation">
-          <div class="gallery-overlay"><h4>تغريسة تخرج</h4><p>Senior 2026</p></div>
-        </div>
-        <div class="gallery-item" data-category="baby-frames">
-          <img src="https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400&h=400&fit=crop" alt="Baby Frame">
-          <div class="gallery-overlay"><h4>برواز مولود</h4><p>تفاصيل الميلاد</p></div>
-        </div>
-        <div class="gallery-item" data-category="coloring-books">
-          <img src="https://images.unsplash.com/photo-1493612276216-ee3925520721?w=400&h=400&fit=crop" alt="Coloring Book 2">
-          <div class="gallery-overlay"><h4>كتاب تلوين حيوانات</h4><p>تصميم كرتوني لطيف</p></div>
-        </div>
-        <div class="gallery-item" data-category="flower-boxes">
-          <img src="https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=400&h=400&fit=crop" alt="Flower Box 2">
-          <div class="gallery-overlay"><h4>بوكس ورد طبيعي</h4><p>ورد مجفف بألوان دافئة</p></div>
-        </div>
-        <div class="gallery-item" data-category="notebooks">
-          <img src="https://images.unsplash.com/photo-1531346878377-a5be20888e57?w=400&h=400&fit=crop" alt="Notebook 2">
-          <div class="gallery-overlay"><h4>نوتة اقتباسات</h4><p>تصميم عربي مميز</p></div>
-        </div>
+        <div class="loading-spinner"></div>
       </div>
     </div>
-  </section> -->
+  </section>
 
   <footer class="footer">
     <div class="container mx-auto px-4">
@@ -111,7 +88,7 @@
         item.style.display = (category === 'all' || item.dataset.category === category) ? 'block' : 'none';
       });
     }
-    document.addEventListener('DOMContentLoaded', function() { updateCartCount(); });
+    document.addEventListener('DOMContentLoaded', function() { renderGallery(); updateCartCount(); });
   </script>
 </body>
 </html>
