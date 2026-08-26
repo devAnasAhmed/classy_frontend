@@ -7,7 +7,7 @@
 function getApiUrl() {
   return localStorage.getItem('classy_api_url') || 'https://classy-backend.vercel.app/api';
 }
-const API_URL = getApiUrl();
+let API_URL = getApiUrl();
 
 // ===== AUTH =====
 function getToken() { return localStorage.getItem('classy_admin_token'); }
