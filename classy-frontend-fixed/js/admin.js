@@ -21,9 +21,12 @@ function getAuthHeaders() {
   const token = getToken();
   if (!token) { window.location.href = 'login.html'; return; }
   const user = JSON.parse(localStorage.getItem('classy_admin_user') || '{}');
-  if (user.name) {
-    document.getElementById('sidebarName').textContent = user.name;
-    document.getElementById('sidebarAvatar').textContent = user.name.charAt(0);
+  // لو المدير غيّر اسمه من قبل، الاسم المحفوظ ده بيبقى له الأولوية
+  const savedName = localStorage.getItem('classy_manager_name');
+  const displayName = savedName || user.name;
+  if (displayName) {
+    document.getElementById('sidebarName').textContent = displayName;
+    document.getElementById('sidebarAvatar').textContent = displayName.charAt(0);
   }
 })();
 
@@ -841,6 +844,25 @@ async function testApiConnection() {
   }
 }
 
+// ===== MANAGER NAME (sidebar display name) =====
+function saveManagerName() {
+  const input = document.getElementById('settingsManagerName');
+  const name = input?.value.trim();
+  if (!name) { showToast('يرجى إدخال اسم المدير!', 'error'); return; }
+
+  localStorage.setItem('classy_manager_name', name);
+
+  // تحديث الاسم كمان جوه بيانات المستخدم المحفوظة عشان يفضل متزامن
+  const user = JSON.parse(localStorage.getItem('classy_admin_user') || '{}');
+  user.name = name;
+  localStorage.setItem('classy_admin_user', JSON.stringify(user));
+
+  document.getElementById('sidebarName').textContent = name;
+  document.getElementById('sidebarAvatar').textContent = name.charAt(0);
+
+  showToast('تم تحديث اسم المدير بنجاح!', 'success');
+}
+
 async function saveAllSettings() {
   const settings = {
     store_name: document.getElementById('settingsStoreName')?.value || 'CLASSY',
@@ -868,6 +890,13 @@ async function saveAllSettings() {
 }
 
 async function loadSettingsToForm() {
+  // تحميل اسم المدير الحالي في حقل الإعدادات لو موجود
+  if (document.getElementById('settingsManagerName')) {
+    const savedName = localStorage.getItem('classy_manager_name');
+    const user = JSON.parse(localStorage.getItem('classy_admin_user') || '{}');
+    document.getElementById('settingsManagerName').value = savedName || user.name || '';
+  }
+
   const res = await apiGet('/settings');
   if (res.success && res.data) {
     const s = res.data;
