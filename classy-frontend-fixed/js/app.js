@@ -10,14 +10,14 @@ function getPublicApiUrl() {
 // ===== DEMO DATA (disabled - real products now come from the backend only) =====
 const DEMO_PRODUCTS = [];
 
-// أيقونة اختيارية لكل تصنيف معروف (شكل بس، مش بيانات وهمية)
-const CATEGORY_ICONS = {
-  'كتب تلوين': '🎨',
-  'بوكسات ورد': '🌹',
-  'نوتات مخصصة': '📓',
-  'تغريسات تخرج': '🎓',
-  'براويز مواليد': '👶',
-};
+const DEMO_CATEGORIES = [
+  { _id: 'c1', name: 'كتب تلوين', icon: '🎨', image: 'https://images.unsplash.com/photo-1513519245088-0e12902e35ca?w=400&h=300&fit=crop', count: 12 },
+  { _id: 'c2', name: 'بوكسات ورد', icon: '🌹', image: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=400&h=300&fit=crop', count: 8 },
+  { _id: 'c3', name: 'نوتات مخصصة', icon: '📓', image: 'https://images.unsplash.com/photo-1544816155-12df9643f363?w=400&h=300&fit=crop', count: 15 },
+  { _id: 'c4', name: 'تغريسات تخرج', icon: '🎓', image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=400&h=300&fit=crop', count: 20 },
+  { _id: 'c5', name: 'براويز مواليد', icon: '👶', image: 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400&h=300&fit=crop', count: 6 },
+  { _id: 'c6', name: 'هدايا مخصصة', icon: '✨', image: 'https://images.unsplash.com/photo-1513519245088-0e12902e35ca?w=400&h=300&fit=crop', count: 10 },
+];
 
 // ===== HELPERS =====
 let cachedProducts = null;
@@ -415,35 +415,14 @@ async function loadProductDetail() {
 }
 
 // ===== CATEGORIES =====
-// التصنيفات بتتحسب دلوقتي من المنتجات الحقيقية القادمة من الباك اند - مفيش بيانات وهمية
-async function loadCategories() {
+function loadCategories() {
   const container = document.getElementById('categoriesContainer');
   if (!container) return;
-
-  const products = await getProducts();
-
-  if (!products.length) {
-    container.innerHTML = '<p class="text-center text-gray-400 col-span-full py-10">لا توجد تصنيفات متاحة حالياً</p>';
-    return;
-  }
-
-  // تجميع المنتجات حسب التصنيف، مع أخذ عدد المنتجات وصورة حقيقية من أول منتج بكل تصنيف
-  const categoriesMap = {};
-  products.forEach(p => {
-    if (!p.category) return;
-    if (!categoriesMap[p.category]) {
-      categoriesMap[p.category] = { name: p.category, image: p.image, count: 0 };
-    }
-    categoriesMap[p.category].count++;
-  });
-
-  const categories = Object.values(categoriesMap);
-
-  container.innerHTML = categories.map(cat => `
+  container.innerHTML = DEMO_CATEGORIES.map(cat => `
     <a href="products.html" class="group relative rounded-3xl overflow-hidden shadow-lg h-64">
       <img src="${cat.image}" alt="${cat.name}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" onerror="this.src='https://placehold.co/400'">
       <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-6">
-        <div class="text-3xl mb-2">${CATEGORY_ICONS[cat.name] || '🎁'}</div>
+        <div class="text-3xl mb-2">${cat.icon}</div>
         <h3 class="text-white text-xl font-bold">${cat.name}</h3>
         <p class="text-white/70 text-sm">${cat.count} منتج</p>
       </div>
