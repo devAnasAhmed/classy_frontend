@@ -699,17 +699,51 @@ async function confirmDelete() {
 let salesChartInstance = null;
 let ordersChartInstance = null;
 
+const ARABIC_MONTHS = { 'يناير':0,'فبراير':1,'مارس':2,'أبريل':3,'مايو':4,'يونيو':5,'يوليو':6,'أغسطس':7,'سبتمبر':8,'أكتوبر':9,'نوفمبر':10,'ديسمبر':11 };
+
+// بيقرأ التاريخ سواء جاي ISO من السيرفر أو نص عربي زي "23 أغسطس 2026"
+function parseOrderDate(raw) {
+  if (!raw) return null;
+  let d = new Date(raw);
+  if (!isNaN(d)) return d;
+  const parts = String(raw).trim().split(' ');
+  if (parts.length === 3 && ARABIC_MONTHS[parts[1]] !== undefined) {
+    return new Date(parseInt(parts[2]), ARABIC_MONTHS[parts[1]], parseInt(parts[0]));
+  }
+  return null;
+}
+
+// بيحسب إجمالي المبيعات الحقيقي لكل شهر من آخر monthsCount شهر (بيستبعد الطلبات الملغية)
+function calculateMonthlySales(monthsCount = 8) {
+  const now = new Date();
+  const monthNames = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+  const buckets = [];
+  for (let i = monthsCount - 1; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    buckets.push({ year: d.getFullYear(), month: d.getMonth(), label: monthNames[d.getMonth()], total: 0 });
+  }
+  orders.forEach(o => {
+    if (o.status === 'cancelled') return;
+    const d = parseOrderDate(o.createdAt || o.date);
+    if (!d) return;
+    const bucket = buckets.find(b => b.year === d.getFullYear() && b.month === d.getMonth());
+    if (bucket) bucket.total += (o.totalPrice || 0);
+  });
+  return { labels: buckets.map(b => b.label), data: buckets.map(b => b.total) };
+}
+
 function initCharts() {
   const salesCtx = document.getElementById('salesChart');
   if (salesCtx) {
     if (salesChartInstance) salesChartInstance.destroy();
+    const { labels: salesLabels, data: salesData } = calculateMonthlySales(8);
     salesChartInstance = new Chart(salesCtx, {
       type: 'line',
       data: {
-        labels: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس'],
+        labels: salesLabels,
         datasets: [{
           label: 'المبيعات (EGP)',
-          data: [12000, 15000, 18000, 14000, 22000, 25000, 21000, 24580],
+          data: salesData,
           borderColor: '#C8A2C8',
           backgroundColor: 'rgba(200, 162, 200, 0.1)',
           borderWidth: 3,
