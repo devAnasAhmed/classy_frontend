@@ -114,7 +114,16 @@ const PAYMENT_LABELS = { cash_on_delivery: 'الدفع عند الاستلام',
 const SHIPPING_LABELS = { standard: 'شحن عادي', express: 'شحن سريع' };
 
 // ===== SIDEBAR =====
-function toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
+// تم التعديل: نفس الزرار بقى يفتح/يقفل صح على الموبايل (كلاس open)
+// وعلى الديسكتوب بيصغّر/يكبّر (كلاس collapsed) - زي ما كان بالظبط
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  if (window.innerWidth <= 768) {
+    sidebar.classList.toggle('open');
+  } else {
+    sidebar.classList.toggle('collapsed');
+  }
+}
 
 function showSection(sectionName) {
   const sections = ['dashboard', 'products', 'orders', 'customers', 'gallery', 'settings'];
@@ -131,6 +140,11 @@ function showSection(sectionName) {
   if (sectionName === 'customers') loadCustomers();
   if (sectionName === 'gallery') loadGallery();
   if (sectionName === 'settings') loadSettingsToForm();
+
+  // على الموبايل: نقفل القايمة تلقائي بعد اختيار قسم عشان المحتوى يبان
+  if (window.innerWidth <= 768) {
+    document.getElementById('sidebar').classList.remove('open');
+  }
 }
 
 // ===== MODALS =====
@@ -840,5 +854,5 @@ async function loadSettingsToForm() {
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', function() { loadAllData(); });
 
-// Mobile sidebar
+// Mobile sidebar (kept for compatibility if any button still calls this directly)
 toggleMobileSidebar = function() { document.getElementById('sidebar').classList.toggle('open'); }
