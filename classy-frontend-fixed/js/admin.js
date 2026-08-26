@@ -34,26 +34,11 @@ function logout() {
 }
 
 // ===== API HELPERS =====
-// دالة مساعدة: تحاول تقرأ الرد كـ JSON، ولو مش JSON (زي صفحة خطأ HTML من السيرفر)
-// ترجع رسالة خطأ واضحة فيها كود الحالة وأول جزء من محتوى الرد عشان نقدر نشخص المشكلة
-async function parseApiResponse(res) {
-  const text = await res.text();
-  try {
-    return JSON.parse(text);
-  } catch (e) {
-    console.error('استجابة السيرفر مش JSON:', res.status, text.slice(0, 300));
-    return {
-      success: false,
-      error: `السيرفر رجّع رد غير متوقع (كود ${res.status}). تأكد إن رابط الـ API صحيح والباك اند شغال. تفاصيل: ${text.slice(0, 150) || 'رد فاضي'}`
-    };
-  }
-}
-
 async function apiGet(endpoint) {
   try {
     const res = await fetch(getApiUrl() + endpoint, { headers: getAuthHeaders() });
-    return await parseApiResponse(res);
-  } catch (e) { return { success: false, error: 'تعذر الاتصال بالسيرفر: ' + e.message }; }
+    return await res.json();
+  } catch (e) { return { success: false, error: e.message }; }
 }
 async function apiPostForm(endpoint, formData) {
   try {
@@ -62,8 +47,8 @@ async function apiPostForm(endpoint, formData) {
       headers: getAuthHeaders(), // Don't set Content-Type - browser sets it with boundary for FormData
       body: formData
     });
-    return await parseApiResponse(res);
-  } catch (e) { return { success: false, error: 'تعذر الاتصال بالسيرفر: ' + e.message }; }
+    return await res.json();
+  } catch (e) { return { success: false, error: e.message }; }
 }
 async function apiPutForm(endpoint, formData) {
   try {
@@ -72,14 +57,14 @@ async function apiPutForm(endpoint, formData) {
       headers: getAuthHeaders(),
       body: formData
     });
-    return await parseApiResponse(res);
-  } catch (e) { return { success: false, error: 'تعذر الاتصال بالسيرفر: ' + e.message }; }
+    return await res.json();
+  } catch (e) { return { success: false, error: e.message }; }
 }
 async function apiDelete(endpoint) {
   try {
     const res = await fetch(getApiUrl() + endpoint, { method: 'DELETE', headers: getAuthHeaders() });
-    return await parseApiResponse(res);
-  } catch (e) { return { success: false, error: 'تعذر الاتصال بالسيرفر: ' + e.message }; }
+    return await res.json();
+  } catch (e) { return { success: false, error: e.message }; }
 }
 
 // ===== DEMO DATA (Fallback) =====
@@ -145,6 +130,7 @@ function showSection(sectionName) {
   if (sectionName === 'orders') loadOrders();
   if (sectionName === 'customers') loadCustomers();
   if (sectionName === 'gallery') loadGallery();
+  if (sectionName === 'settings') loadSettingsToForm();
 }
 
 // ===== MODALS =====
@@ -301,7 +287,7 @@ function renderProductsTable(filter = '') {
     <tr>
       <td>
         <div class="table-product">
-          <img src="${p.image || 'https://via.placeholder.com/100'}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/100'">
+          <img src="${p.image || 'https://placehold.co/100'}" alt="${p.name}" onerror="this.src='https://placehold.co/100'">
           <div class="table-product-info"><h4>${p.name}</h4><p>ID: #${String(p._id).slice(-4)}</p></div>
         </div>
       </td>
@@ -333,7 +319,7 @@ function viewProduct(id) {
   const p = products.find(x => x._id == id);
   if (!p) return;
   document.getElementById('productViewBody').innerHTML = `
-    <div class="text-center mb-4"><img src="${p.image || 'https://via.placeholder.com/150'}" alt="${p.name}" style="width:150px;height:150px;object-fit:cover;border-radius:16px;" onerror="this.src='https://via.placeholder.com/150'"></div>
+    <div class="text-center mb-4"><img src="${p.image || 'https://placehold.co/150'}" alt="${p.name}" style="width:150px;height:150px;object-fit:cover;border-radius:16px;" onerror="this.src='https://placehold.co/150'"></div>
     <div class="space-y-3">
       <div class="flex justify-between p-3 bg-gray-50 rounded-xl"><span class="text-gray-500">الاسم:</span><span class="font-bold">${p.name}</span></div>
       <div class="flex justify-between p-3 bg-gray-50 rounded-xl"><span class="text-gray-500">التصنيف:</span><span class="font-bold">${p.category}</span></div>
@@ -619,7 +605,7 @@ function renderGalleryGrid() {
   if (!galleryItems.length) { grid.innerHTML = '<div class="col-span-full text-center py-10 text-gray-400">لا توجد صور</div>'; return; }
   grid.innerHTML = galleryItems.map(g => `
     <div class="gallery-item" style="position:relative;">
-      <img src="${g.image || g.img}" alt="${g.title}" style="width:100%;height:220px;object-fit:cover;border-radius:16px;" onerror="this.src='https://via.placeholder.com/400'">
+      <img src="${g.image || g.img}" alt="${g.title}" style="width:100%;height:220px;object-fit:cover;border-radius:16px;" onerror="this.src='https://placehold.co/400'">
       <div class="gallery-overlay" style="border-radius:16px;"><h4>${g.title}</h4><p>${g.desc || g.description} — ${g.category}</p></div>
       <div style="position:absolute;top:10px;left:10px;display:flex;gap:6px;">
         <button class="action-btn edit" onclick="editGalleryItem('${g._id}')" title="تعديل" style="background:rgba(255,255,255,0.9);"><i class="fas fa-edit"></i></button>
@@ -784,24 +770,16 @@ async function testApiConnection() {
   const resultDiv = document.getElementById('apiTestResult');
   if (!resultDiv) return;
   resultDiv.innerHTML = '<span class="text-blue-500">جاري الاختبار...</span>';
-  const healthUrl = getApiUrl().replace(/\/api\/?$/, '') + '/api/health';
   try {
-    const res = await fetch(healthUrl);
-    const text = await res.text();
-    let data;
-    try { data = JSON.parse(text); }
-    catch (parseErr) {
-      resultDiv.innerHTML = `<span class="text-red-500"><i class="fas fa-times-circle"></i> السيرفر رد بكود ${res.status} لكن الرد مش JSON. ممكن يكون مسار /api/health مش موجود في الباك اند أصلاً (مش بالضرورة مشكلة في باقي الـ API). تفاصيل الرد: ${text.slice(0, 150) || 'فاضي'}</span>`;
-      return;
-    }
-    if (res.ok && data.success) {
+    const res = await fetch(getApiUrl().replace('/api', '') + '/api/health');
+    const data = await res.json();
+    if (data.success) {
       resultDiv.innerHTML = '<span class="text-green-500"><i class="fas fa-check-circle"></i> الاتصال ناجح! السيرفر يعمل.</span>';
     } else {
-      resultDiv.innerHTML = `<span class="text-yellow-500">⚠️ السيرفر رد بكود ${res.status} بس فيه مشكلة: ${data.message || data.error || 'غير معروف'}</span>`;
+      resultDiv.innerHTML = '<span class="text-yellow-500">⚠️ السيرفر رد بس فيه مشكلة.</span>';
     }
   } catch (e) {
-    console.error('API health check failed:', healthUrl, e);
-    resultDiv.innerHTML = `<span class="text-red-500"><i class="fas fa-times-circle"></i> فشل الاتصال بالكامل (${e.message}). الاحتمالات: الرابط غلط، السيرفر واقف، أو مشكلة CORS بتمنع المتصفح من قراءة الرد. افتح Console (F12) وشوف الرسالة الكاملة.</span>`;
+    resultDiv.innerHTML = '<span class="text-red-500"><i class="fas fa-times-circle"></i> فشل الاتصال. تأكد من الرابط.</span>';
   }
 }
 
