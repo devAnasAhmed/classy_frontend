@@ -60,6 +60,16 @@ async function apiPutForm(endpoint, formData) {
     return await res.json();
   } catch (e) { return { success: false, error: e.message }; }
 }
+async function apiPutJSON(endpoint, dataObject) {
+  try {
+    const res = await fetch(getApiUrl() + endpoint, {
+      method: 'PUT',
+      headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify(dataObject)
+    });
+    return await res.json();
+  } catch (e) { return { success: false, error: e.message }; }
+}
 async function apiDelete(endpoint) {
   try {
     const res = await fetch(getApiUrl() + endpoint, { method: 'DELETE', headers: getAuthHeaders() });
@@ -549,7 +559,7 @@ async function saveOrderEdit() {
     status: document.getElementById('editOrderStatus').value,
     notes: document.getElementById('editOrderNotes').value.trim()
   };
-  const res = await apiPutForm('/orders/' + id, new URLSearchParams(body)); // orders don't have file upload
+  const res = await apiPutJSON('/orders/' + id, body); // JSON عشان customer object متداخل ومتبعتش صح مع URLSearchParams
   if (res.success) {
     showToast('تم تحديث الطلب بنجاح!', 'success');
     closeModal('orderEditModal');
