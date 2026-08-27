@@ -80,12 +80,12 @@ const DEMO_PRODUCTS = [
 ];
 
 const DEMO_ORDERS = [
-  { _id: 'o1', orderNumber: '#ORD00001', customer: { name: 'فاطمة محمد', phone: '201226832747', email: 'fatima@example.com', address: 'القاهرة، مصر الجديدة' }, items: [{ productName: 'بوكس ورد مجفف', quantity: 1, price: 350 }, { productName: 'نوتة Van Gogh', quantity: 1, price: 85 }], totalPrice: 435, paymentMethod: 'cash_on_delivery', shippingMethod: 'standard', status: 'pending', notes: 'يرجى التواصل قبل التوصيل', date: '23 أغسطس 2026' },
-  { _id: 'o2', orderNumber: '#ORD00002', customer: { name: 'نور أحمد', phone: '201111111111', email: 'nour@example.com', address: 'الإسكندرية، سموحة' }, items: [{ productName: 'كتاب تلوين Mandala', quantity: 1, price: 120 }], totalPrice: 120, paymentMethod: 'cash_on_delivery', shippingMethod: 'express', status: 'processing', notes: '', date: '22 أغسطس 2026' },
-  { _id: 'o3', orderNumber: '#ORD00003', customer: { name: 'ياسمين خالد', phone: '201222222222', email: 'yasmin@example.com', address: 'الجيزة، الدقي' }, items: [{ productName: 'برواز مولود', quantity: 1, price: 200 }, { productName: 'تغريسة تخرج', quantity: 1, price: 60 }], totalPrice: 260, paymentMethod: 'cash_on_delivery', shippingMethod: 'standard', status: 'delivered', notes: 'هدية', date: '21 أغسطس 2026' },
-  { _id: 'o4', orderNumber: '#ORD00004', customer: { name: 'سارة علي', phone: '201333333333', email: 'sara@example.com', address: 'القاهرة، مدينة نصر' }, items: [{ productName: 'نوتة Van Gogh', quantity: 1, price: 85 }, { productName: 'بوكس ورد', quantity: 1, price: 350 }], totalPrice: 435, paymentMethod: 'cash_on_delivery', shippingMethod: 'standard', status: 'pending', notes: '', date: '20 أغسطس 2026' },
-  { _id: 'o5', orderNumber: '#ORD00005', customer: { name: 'محمد حسن', phone: '201444444444', email: 'mohamed@example.com', address: 'القاهرة، المعادي' }, items: [{ productName: 'تغريسة تخرج', quantity: 5, price: 60 }], totalPrice: 300, paymentMethod: 'cash_on_delivery', shippingMethod: 'express', status: 'processing', notes: '5 تغريسات', date: '19 أغسطس 2026' },
-  { _id: 'o6', orderNumber: '#ORD00006', customer: { name: 'ليلى سامي', phone: '201555555555', email: 'laila@example.com', address: 'طنطا، شارع الجيش' }, items: [{ productName: 'كتاب تلوين', quantity: 2, price: 120 }, { productName: 'نوتة', quantity: 1, price: 85 }], totalPrice: 325, paymentMethod: 'online', shippingMethod: 'standard', status: 'cancelled', notes: 'ألغى العميل', date: '18 أغسطس 2026' },
+  { _id: 'o1', orderNumber: '#ORD00001', customer: { name: 'فاطمة محمد', phone: '201226832747', email: 'fatima@example.com', address: 'القاهرة، مصر الجديدة' }, items: [{ productName: 'بوكس ورد مجفف', quantity: 1, price: 350 }, { productName: 'نوتة Van Gogh', quantity: 1, price: 85 }], totalPrice: 435, paymentMethod: 'cash_on_delivery', shippingMethod: 'standard', status: 'pending', notes: 'يرجى التواصل قبل التوصيل', date: '23 أغسطس 2026', createdAt: '2026-08-23T10:00:00.000Z' },
+  { _id: 'o2', orderNumber: '#ORD00002', customer: { name: 'نور أحمد', phone: '201111111111', email: 'nour@example.com', address: 'الإسكندرية، سموحة' }, items: [{ productName: 'كتاب تلوين Mandala', quantity: 1, price: 120 }], totalPrice: 120, paymentMethod: 'cash_on_delivery', shippingMethod: 'express', status: 'processing', notes: '', date: '22 أغسطس 2026', createdAt: '2026-08-22T10:00:00.000Z' },
+  { _id: 'o3', orderNumber: '#ORD00003', customer: { name: 'ياسمين خالد', phone: '201222222222', email: 'yasmin@example.com', address: 'الجيزة، الدقي' }, items: [{ productName: 'برواز مولود', quantity: 1, price: 200 }, { productName: 'تغريسة تخرج', quantity: 1, price: 60 }], totalPrice: 260, paymentMethod: 'cash_on_delivery', shippingMethod: 'standard', status: 'delivered', notes: 'هدية', date: '21 أغسطس 2026', createdAt: '2026-08-21T10:00:00.000Z' },
+  { _id: 'o4', orderNumber: '#ORD00004', customer: { name: 'سارة علي', phone: '201333333333', email: 'sara@example.com', address: 'القاهرة، مدينة نصر' }, items: [{ productName: 'نوتة Van Gogh', quantity: 1, price: 85 }, { productName: 'بوكس ورد', quantity: 1, price: 350 }], totalPrice: 435, paymentMethod: 'cash_on_delivery', shippingMethod: 'standard', status: 'pending', notes: '', date: '20 أغسطس 2026', createdAt: '2026-08-20T10:00:00.000Z' },
+  { _id: 'o5', orderNumber: '#ORD00005', customer: { name: 'محمد حسن', phone: '201444444444', email: 'mohamed@example.com', address: 'القاهرة، المعادي' }, items: [{ productName: 'تغريسة تخرج', quantity: 5, price: 60 }], totalPrice: 300, paymentMethod: 'cash_on_delivery', shippingMethod: 'express', status: 'processing', notes: '5 تغريسات', date: '19 أغسطس 2026', createdAt: '2026-08-19T10:00:00.000Z' },
+  { _id: 'o6', orderNumber: '#ORD00006', customer: { name: 'ليلى سامي', phone: '201555555555', email: 'laila@example.com', address: 'طنطا، شارع الجيش' }, items: [{ productName: 'كتاب تلوين', quantity: 2, price: 120 }, { productName: 'نوتة', quantity: 1, price: 85 }], totalPrice: 325, paymentMethod: 'online', shippingMethod: 'standard', status: 'cancelled', notes: 'ألغى العميل', date: '18 أغسطس 2026', createdAt: '2026-08-18T10:00:00.000Z' },
 ];
 
 const DEMO_CUSTOMERS = [
@@ -114,7 +114,19 @@ const PAYMENT_LABELS = { cash_on_delivery: 'الدفع عند الاستلام',
 const SHIPPING_LABELS = { standard: 'شحن عادي', express: 'شحن سريع' };
 
 // ===== SIDEBAR =====
-function toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
+// FIX: فنكشن واحدة موحدة بتفرق بين وضع الموبايل ووضع الديسكتوب
+// بدل ما كان فيه toggleSidebar() (بتستخدم كلاس collapsed) و toggleMobileSidebar()
+// (بتستخدم كلاس open) منفصلين عن بعض، والزرار في الهيدر كان بينده على
+// toggleSidebar() بس، فعلى الموبايل الكلاس اللي بيتضاف (collapsed) مالوش
+// أي تأثير في الـ CSS الخاص بالموبايل، فالقائمة كانت بتفضل مقفولة.
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  if (window.innerWidth <= 768) {
+    sidebar.classList.toggle('open');
+  } else {
+    sidebar.classList.toggle('collapsed');
+  }
+}
 
 function showSection(sectionName) {
   const sections = ['dashboard', 'products', 'orders', 'customers', 'gallery', 'settings'];
@@ -131,6 +143,12 @@ function showSection(sectionName) {
   if (sectionName === 'customers') loadCustomers();
   if (sectionName === 'gallery') loadGallery();
   if (sectionName === 'settings') loadSettingsToForm();
+
+  // FIX: على الموبايل نقفل القائمة تلقائيًا بعد اختيار قسم عشان المستخدم يشوف المحتوى فورًا
+  if (window.innerWidth <= 768) {
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar) sidebar.classList.remove('open');
+  }
 }
 
 // ===== MODALS =====
@@ -704,17 +722,39 @@ async function confirmDelete() {
 let salesChartInstance = null;
 let ordersChartInstance = null;
 
+// FIX: بيانات المبيعات كانت مكتوبة يدويًا (hardcoded) بدل ما تتحسب من orders
+// الحقيقية. الفنكشن دي بتجمع مبيعات آخر 6 شهور من array الطلبات الفعلي
+// (بتستبعد الطلبات الملغاة) وترجع labels + data جاهزين للشارت.
+function getMonthlySalesData() {
+  const monthNames = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+  const now = new Date();
+  const months = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months.push({ label: monthNames[d.getMonth()], year: d.getFullYear(), month: d.getMonth(), total: 0 });
+  }
+  orders.forEach(o => {
+    if (o.status === 'cancelled') return;
+    const d = new Date(o.createdAt || o.date);
+    if (isNaN(d)) return; // تاريخ غير صالح (نص عربي مثلاً) بيتجاهل بدل ما يبوظ الحساب
+    const bucket = months.find(m => m.month === d.getMonth() && m.year === d.getFullYear());
+    if (bucket) bucket.total += (o.totalPrice || 0);
+  });
+  return { labels: months.map(m => m.label), data: months.map(m => m.total) };
+}
+
 function initCharts() {
   const salesCtx = document.getElementById('salesChart');
   if (salesCtx) {
     if (salesChartInstance) salesChartInstance.destroy();
+    const monthly = getMonthlySalesData();
     salesChartInstance = new Chart(salesCtx, {
       type: 'line',
       data: {
-        labels: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس'],
+        labels: monthly.labels,
         datasets: [{
           label: 'المبيعات (EGP)',
-          data: [12000, 15000, 18000, 14000, 22000, 25000, 21000, 24580],
+          data: monthly.data,
           borderColor: '#C8A2C8',
           backgroundColor: 'rgba(200, 162, 200, 0.1)',
           borderWidth: 3,
@@ -858,6 +898,3 @@ async function loadSettingsToForm() {
 
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', function() { loadAllData(); });
-
-// Mobile sidebar
-toggleMobileSidebar = function() { document.getElementById('sidebar').classList.toggle('open'); }
