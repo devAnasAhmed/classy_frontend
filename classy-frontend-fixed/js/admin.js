@@ -573,12 +573,23 @@ function openEditFromView() { closeModal('orderViewModal'); if (currentViewOrder
 
 async function saveOrderEdit() {
   const id = document.getElementById('editOrderId').value;
+  const custName = document.getElementById('editCustName').value.trim();
+  const custPhone = document.getElementById('editCustPhone').value.trim();
+  const custAddress = document.getElementById('editCustAddress').value.trim();
+
+  // FIX: تحقق قبل الإرسال بدل ما نسيب السيرفر يرفض الطلب بخطأ Validation
+  // لو الطلب أصلاً كان محفوظ من غير بيانات عميل كاملة (زي الطلبات المخصصة)
+  if (!custName || !custPhone || !custAddress) {
+    showToast('يرجى ملء اسم العميل ورقم الهاتف والعنوان قبل الحفظ!', 'error');
+    return;
+  }
+
   const body = {
     customer: {
-      name: document.getElementById('editCustName').value.trim(),
-      phone: document.getElementById('editCustPhone').value.trim(),
+      name: custName,
+      phone: custPhone,
       email: document.getElementById('editCustEmail').value.trim(),
-      address: document.getElementById('editCustAddress').value.trim()
+      address: custAddress
     },
     paymentMethod: document.getElementById('editPaymentMethod').value,
     shippingMethod: document.getElementById('editShippingMethod').value,
