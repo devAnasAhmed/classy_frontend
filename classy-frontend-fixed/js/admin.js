@@ -66,6 +66,19 @@ async function apiDelete(endpoint) {
     return await res.json();
   } catch (e) { return { success: false, error: e.message }; }
 }
+// FIX: لإرسال بيانات فيها object متداخل (زي customer) لازم تتبعت JSON مش
+// URLSearchParams. URLSearchParams بيحول أي object جواه لنص "[object Object]"
+// وده كان بيسبب خطأ الـ Cast في الباك اند عند تعديل الطلب.
+async function apiPutJSON(endpoint, bodyObj) {
+  try {
+    const res = await fetch(getApiUrl() + endpoint, {
+      method: 'PUT',
+      headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify(bodyObj)
+    });
+    return await res.json();
+  } catch (e) { return { success: false, error: e.message }; }
+}
 
 // ===== DEMO DATA (Fallback) =====
 let products = [], orders = [], customers = [], galleryItems = [];
@@ -572,7 +585,7 @@ async function saveOrderEdit() {
     status: document.getElementById('editOrderStatus').value,
     notes: document.getElementById('editOrderNotes').value.trim()
   };
-  const res = await apiPutForm('/orders/' + id, new URLSearchParams(body)); // orders don't have file upload
+  const res = await apiPutJSON('/orders/' + id, body); // JSON عشان customer object متداخل يتحفظ صح
   if (res.success) {
     showToast('تم تحديث الطلب بنجاح!', 'success');
     closeModal('orderEditModal');
